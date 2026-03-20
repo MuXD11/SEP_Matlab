@@ -7,10 +7,10 @@ k_B = 1.381e-23;        % [J/K] Boltzmann constant
  
 % Detector parameters
 R   = 1;                % [A/W] responsivity
-B   = 1e9;              % [Hz]  electrical bandwidth
+B   = 1e9;              % [Hz]  electrical bandwidth or bit rate 0.1 GHz (meeting with Rudolf), the time trace has a bandwidth of 500 to 1000 Hz
 T   = 290;              % [K]   noise temperature
 F   = 3;                % [-]   noise figure (linear)
-R_L = 50;               % [Ohm] load resistance
+R_L = 100;               % [Ohm] load resistance
  
 % Received power sweep
 P_rx  = logspace(-12, -3, 500);        % [W]
@@ -19,7 +19,7 @@ P_dBm = 10 * log10(P_rx * 1e3);       % [dBm]
 % Noise variances
 var_shot = 2 * q * R .* P_rx * B;     % shot noise (signal-dependent)
 var_th   = 4 * k_B * T * F * B / R_L; % thermal noise (constant)
- 
+
 % Q-factor and BER
 Q   = R .* P_rx ./ (sqrt(var_shot + var_th) + sqrt(var_th));
 BER = 0.5 * erfc(Q / sqrt(2));
