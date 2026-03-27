@@ -114,8 +114,6 @@ sigma_pj = mean([std(xr), std(yr)]);  % average over x and y
 I_open   = exp(-2 * ((xd + x_se).^2 + (yd + y_se).^2) / w_beam^2);
 I_closed = exp(-2 * ((xr + x_se).^2 + (yr + y_se).^2) / w_beam^2);
 
-
-
 % ------------------------------------------------------------------------
 % 9) PRINT USEFUL STATISTICS
 % -------------------------------------------------------------------------
@@ -130,6 +128,31 @@ fprintf('mean(I_open)   = %.4f\n', mean(I_open));
 fprintf('mean(I_closed) = %.4f\n', mean(I_closed));
 fprintf('min(I_open)    = %.4f\n', min(I_open));
 fprintf('min(I_closed)  = %.4f\n', min(I_closed));
+
+% ------------------------------------------------------------------------
+% 9.1) COMPUT
+% -------------------------------------------------------------------------
+
+% Complementary sensitivity bandwidth:
+% frequency where |T(jw)| = 1  <=>  0 dB
+idx_bw = find(T_mag(1:end-1) >= 0 & T_mag(2:end) <= 0, 1, 'first');
+
+if ~isempty(idx_bw)
+    % Log-frequency interpolation for a smoother estimate
+    f1 = f_vec(idx_bw);
+    f2 = f_vec(idx_bw+1);
+    m1 = T_mag(idx_bw);
+    m2 = T_mag(idx_bw+1);
+
+    logf_bw = interp1([m1 m2], log10([f1 f2]), 0);
+    fT_bw = 10^logf_bw;
+else
+    fT_bw = NaN;
+end
+
+fprintf('Complementary sensitivity bandwidth: %.2f Hz\n', fT_bw)
+
+
 
 % ========================================================================
 % 10) PLOTS
@@ -247,71 +270,6 @@ grid on;
 xlabel('Frequency (Hz)');
 ylabel('Phase (deg)');
 legend('Phase of S', 'Phase of T', 'Location','best');
-
-
-
-% ------------------------------------------------------------------------
-%  COMPUTE COMPLEMENTARY SENSITIVITY BANDWIDTH
-% -------------------------------------------------------------------------
-
-% Complementary sensitivity bandwidth:
-% frequency where |T(jw)| = 1 (0 dB)
-idx_bw = find(T_mag(1:end-1) >= 0 & T_mag(2:end) <= 0, 1, 'first');
-
-if ~isempty(idx_bw)
-    % Log-frequency interpolation for a smoother estimate
-    f1 = f_vec(idx_bw);
-    f2 = f_vec(idx_bw+1);
-    m1 = T_mag(idx_bw);
-    m2 = T_mag(idx_bw+1);
-
-    logf_bw = interp1([m1 m2], log10([f1 f2]), 0);
-    fT_bw = 10^logf_bw;
-else
-    fT_bw = NaN;
-end
-
-fprintf('Complementary sensitivity bandwidth: %.2f Hz\n', fT_bw);
-
-figure('Name','S(s) and T(s) with T-bandwidth');
-subplot(2,1,1);
-semilogx(f_vec, S_mag, 'b', 'LineWidth', 1.5); hold on;
-semilogx(f_vec, T_mag, 'r', 'LineWidth', 1.5);
-yline(0, 'k--', '0 dB', 'LabelHorizontalAlignment','left');
-
-if ~isnan(fT_bw)
-    xline(fT_bw, 'r--', sprintf('f_{bw,T} = %.1f Hz', fT_bw), ...
-        'LineWidth', 1.2, 'LabelVerticalAlignment','bottom');
-end
-
-grid on;
-ylabel('Magnitude (dB)');
-title('Sensitivity S(s) and Complementary Sensitivity T(s)');
-legend('S = 1/(1+L)', 'T = L/(1+L)', '0 dB', ...
-    sprintf('T bandwidth = %.1f Hz', fT_bw), ...
-    'Location','east');
-
-subplot(2,1,2);
-semilogx(f_vec, S_pha, 'b', 'LineWidth', 1.5); hold on;
-semilogx(f_vec, T_pha, 'r', 'LineWidth', 1.5);
-
-if ~isnan(fT_bw)
-    xline(fT_bw, 'r--', 'LineWidth', 1.2);
-end
-
-grid on;
-xlabel('Frequency (Hz)');
-ylabel('Phase (deg)');
-legend('Phase of S', 'Phase of T', 'Location','best');
-
-
-
-
-
-
-
-
-
 
 % -----------------------------------------------------------------------
 % PLOT D: Disturbances before and after control
