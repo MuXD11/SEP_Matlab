@@ -32,7 +32,7 @@ wi  = 10;               % integral-shaping factor
 wis = 1;                % leaky integrator pole factor
 
 % Disturbance parameters
-f_bw = 500;             % disturbance bandwidth [Hz]
+f_bw = 400;             % disturbance bandwidth [Hz]
 sigma_dist = 10e-6;     % target std of disturbance [rad] = 10 urad
 
 % Optical beam parameters
